@@ -1,6 +1,4 @@
-//fastapi
 gunicorn==20.0.4
-//uvicorn
 numpy==1.18.2
 scikit-learn==0.21.3
 scipy==1.4.1
