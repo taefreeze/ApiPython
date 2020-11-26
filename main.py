@@ -53,18 +53,17 @@ async def bmi(h : int=1, w : int = 0):
     h = (h/100) ** 2
     des = ""
     bmi = w/h
-
-    if(bmi < 18.5):
-        des = "ผอมจัง"
-    if (bmi < 23):
-        des = "สมส่วน"
-    if (bmi < 25):
-        des = "ท้วม"
     if (bmi <30):
         des = "อ้วน"
+    if (bmi < 25):
+        des = "ท้วม" 
+    if (bmi < 23):
+        des = "สมส่วน"      
+    if(bmi < 18.5):
+        des = "ผอมจัง"
     else :
         des = "อ้วนมากแล้วนะ"
-    jsonout = {'bmi' : f'{bmi:2f}','des' : des}
+    jsonout = {'bmi' : f'{bmi:.2f}','des' : des}
     return jsonout
 
 @app.get("/desc")
