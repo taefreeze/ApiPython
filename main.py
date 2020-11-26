@@ -48,6 +48,16 @@ async def asc(li):
     ls.sort()
     return ls
 
+@app.get("/bmi")
+async def bmi(h : int=1, w : int = 0):
+    h = (h/100) ** 2
+    des = ""
+    bmi = w/h
+    if(bmi < 18.5):
+        des = "ผอมจัง"
+    jsonout = {'bmi' : bmi,'des' : des}
+    return jsonout
+
 @app.get("/desc")
 async def desc(li):
     ls = tonumlist(li)
