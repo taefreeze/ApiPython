@@ -9,6 +9,7 @@ import math
 import requests
 from bs4 import BeautifulSoup
 from fastapi.responses import PlainTextResponse
+from collections import Counter
 
 app = FastAPI()
 
@@ -30,6 +31,22 @@ async def add(a: int = 0, b: int = 0):
 @app.get("/mul")
 async def mul(a: int = 0, b: int = 0):
     return a*b
+
+@app.get("/work")
+async def work(text : str =""):
+    #remove lead and ending space
+        #text.strip()
+    #replace all space with nothing
+    text = text.replace(' ','')
+    char_frequency = {}
+    for i in text: 
+        if i in char_frequency: 
+            char_frequency[i] += 1
+        else: 
+            char_frequency[i] = 1
+    #result = [item for items, c in Counter(char_frequency).most_common() for item in [items] * c]
+    jsonout =  {str(sorted(char_frequency.items(), key=lambda item: item[1], reverse= True))}
+    return jsonout
 
 @app.get("/pow")
 async def pow(a: int = 0, b: int = 0):
