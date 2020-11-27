@@ -32,21 +32,35 @@ async def add(a: int = 0, b: int = 0):
 async def mul(a: int = 0, b: int = 0):
     return a*b
 
-@app.get("/work")
+@app.get("/work",response_class=PlainTextResponse)
 async def work(text : str =""):
     #remove lead and ending space
         #text.strip()
-    #replace all space with nothing
-    text = text.replace(' ','')
+    #replace all spaces with nothing
+        #text = text.replace(' ','')
+        #space " " is count as string/letter/character
+
+    #variable
     char_frequency = {}
+    string_out = ""
+
+    #loop for dictionary
     for i in text: 
         if i in char_frequency: 
             char_frequency[i] += 1
         else: 
             char_frequency[i] = 1
+
+    #loop for  rearrange character
+    x = sorted(char_frequency.items(),key=lambda item: item[1],reverse= True)
+    for obj in x :
+        string_out += obj[0] + ' = ' + str(obj[1]) +'\n'
+    
     #result = [item for items, c in Counter(char_frequency).most_common() for item in [items] * c]
-    jsonout =  {str(sorted(char_frequency.items(), key=lambda item: item[1], reverse= True))}
-    return jsonout
+    #jsonout =  {'char' : sorted(char_frequency.items())} #,key=lambda item: item[1], reverse= True
+
+    return string_out
+
 
 @app.get("/pow")
 async def pow(a: int = 0, b: int = 0):
