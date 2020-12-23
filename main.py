@@ -75,5 +75,4 @@ def signup(email, username: str, password: str):
 
 
 if __name__ == '__main__':
-   port = int(os.environ.get("PORT", 5000))
-   uvicorn.run(app, host="0.0.0.0", port=port, debug=True) 
+   uvicorn.run(app, host="0.0.0.0", port=80, debug=True) 
