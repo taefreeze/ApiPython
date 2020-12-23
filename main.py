@@ -38,7 +38,6 @@ app = FastAPI()
 
 def result(res):
     return {"result":res}
-
 @app.get("/")
 async def main():
     return 'Hello World'
