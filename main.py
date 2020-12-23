@@ -15,7 +15,7 @@ from fastapi.responses import PlainTextResponse
 from collections import Counter
 from schematics.models import Model
 from schematics.types import StringType, EmailType
-
+from fastapi.middleware.cors import CORSMiddleware
 
 class NewApiList(Model):
     obj_id = ObjectId()
@@ -35,6 +35,15 @@ def create_user(email, username, password):
     return dict(newList)
 
 app = FastAPI()
+
+# Allow CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def result(res):
     return {"result":res}
