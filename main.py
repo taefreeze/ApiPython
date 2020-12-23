@@ -16,6 +16,7 @@ from collections import Counter
 from schematics.models import Model
 from schematics.types import StringType, EmailType
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 class NewApiList(Model):
     obj_id = ObjectId()
@@ -74,4 +75,5 @@ def signup(email, username: str, password: str):
 
 
 if __name__ == '__main__':
-   uvicorn.run(app, host="0.0.0.0", port=80, debug=True) 
+   port = int(os.environ.get("PORT", 5000))
+   uvicorn.run(app, host="0.0.0.0", port=port, debug=True) 
