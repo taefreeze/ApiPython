@@ -2,7 +2,7 @@
 #Date: December 23,2020.
 
 from fastapi import FastAPI
-from typing import Optional
+from typing import List, Optional
 import connection
 import uvicorn
 import numpy as np
@@ -17,22 +17,25 @@ from schematics.models import Model
 from schematics.types import StringType, EmailType
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from pymongo import MongoClient
 
 class NewApiList(Model):
     obj_id = ObjectId()
-    email = EmailType(required=True)
-    name = StringType(required=True)
-    password = StringType(required=True)
+    name_eng = StringType(required=True)
+    name_th = StringType(required=True)
+    api_url = StringType(required=True)
+    param1 = StringType(required=True)
     
 # An instance of class NewApiList
 newList = NewApiList()
 
 # funtion to create and assign values to the instanse of class User created
-def create_user(email, username, password):
+def create(name_eng, name_th, api_url, param1):
     newList.obj_id = ObjectId()
-    newList.email = email
-    newList.name = username
-    newList.password = password
+    newList.name_eng = name_eng
+    newList.name_th = name_th
+    newList.api_url = api_url
+    newList.param1 = param1
     return dict(newList)
 
 app = FastAPI()
@@ -52,26 +55,34 @@ def result(res):
 async def main():
     return 'Hello World'
 
+@app.get("/ApiList")
+async def ApiList():
+    #jsonout = list(connection.db.List.find({},{_id:0}))
+    jsonout = {}
+    for data in connection.db.List.find():
+        jsonout = {'name_eng' : data["name_eng"]}
+    return jsonout
+
 # Signup endpoint with the POST method
-@app.post("/signup/{email}/{username}/{password}")
-def signup(email, username: str, password: str):
-    user_exists = False
-    data = create_user(email, username, password)
+@app.post("/ApiSignup")
+def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
+    is_exists = False
+    data = create(name_eng, name_th, api_url, param1)
 
     # Covert data to dict so it can be easily inserted to MongoDB
     dict(data)
 
     # Checks if an email exists from the collection of users
     if connection.db.List.find(
-        {'email': data['email']}
+        {'name_eng': data['name_eng']}
         ).count() > 0:
-        user_exists = True
+        is_exists = True
         print("Api Already Exists")
         return {"message":"The Name Api Already Exists"}
     # If the email doesn't exist, create the user
-    elif user_exists == False:
+    elif is_exists == False:
         connection.db.List.insert_one(data)
-        return {"message":"User Created","email": data['email'], "name": data['name'], "pass": data['password']}
+        return {"message":"Success Created","name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1']}
 
 
 if __name__ == '__main__':
