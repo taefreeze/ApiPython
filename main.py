@@ -18,7 +18,7 @@ from schematics.types import StringType, EmailType
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from pymongo import MongoClient
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 import pytz
 import time
 
@@ -114,7 +114,8 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
         "%A %d %B %Y %I:%M%p",
         "%d-%b-%y %I:%M%p"
         ]
-        data['time'] = time.ctime()
+        #modify
+        data['time'] = datetime.now() + timedelta(hours=7)
         data['Operation'] = 'Create'
         connection.db.Logs.insert_one(data)
         return {"message":"Success Created","Operation" : 'Create',"name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
