@@ -59,7 +59,7 @@ async def main():
 @app.get("/ApiList")
 async def ApiList():
     #create dict for stored data in collections
-                    #jsonout = list(connection.db.List.find({},{_id:0}))
+    #jsonout = list(connection.db.List.find({},{_id:0}))
     jsonout = {}
     #loop in collections
     for a in connection.db.List.find():
@@ -87,7 +87,7 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
         connection.db.List.insert_one(data)
         data['time'] = datetime.now()
         connection.db.Logs.insert_one(data)
-        return {"message":"Success Created","name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1']}
+        return {"message":"Success Created","name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
 
 
 if __name__ == '__main__':
