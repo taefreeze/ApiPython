@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from pymongo import MongoClient
 from datetime import datetime
+import pytz
 
 class NewApiList(Model):
     obj_id = ObjectId()
@@ -68,6 +69,24 @@ async def ApiList():
         jsonout[id] = dict
     return jsonout
 
+@app.get("/Logs")
+async def Logs():
+    jsonout = {}
+    timezone = pytz.timezone('Asia/Bangkok')
+    thisDate = datetime.now()
+    fmt = [
+        "%d/%m/%y %H:%M",
+        "%a %d %b %Y %I:%M%p",
+        "%A %d %B %Y %I:%M%p",
+        "%d-%b-%y %I:%M%p"
+    ]
+    for data in connection.db.Logs.find():
+        id = '{0}'.format(data['_id'])
+        dict = {'name_eng' : data.get('name_eng'),'name_th' : data.get('name_th'),'api_url' : data.get('api_url'),'params': data.get('param1') , 'time': "{}".format(data.get('time').strftime(fmt[2]))}
+        jsonout[id] = dict
+    #ok 200
+    return jsonout
+
 # Signup endpoint with the POST method
 @app.post("/ApiSignup")
 def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
@@ -85,7 +104,15 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
     # If the email doesn't exist, create the user
     elif is_exists == False:
         connection.db.List.insert_one(data)
-        data['time'] = datetime.now()
+        #this var +0
+        thisDate = datetime.now()
+        fmt = [
+        "%d/%m/%y %H:%M",
+        "%a %d %b %Y %I:%M%p",
+        "%A %d %B %Y %I:%M%p",
+        "%d-%b-%y %I:%M%p"
+        ]
+        data['time'] = thisDate
         connection.db.Logs.insert_one(data)
         return {"message":"Success Created","name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
 
