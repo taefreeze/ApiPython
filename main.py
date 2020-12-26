@@ -18,7 +18,7 @@ from schematics.types import StringType, EmailType
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, time
 import pytz
 
 class NewApiList(Model):
@@ -105,7 +105,8 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
     elif is_exists == False:
         connection.db.List.insert_one(data)
         #this var +0
-        thisDate = datetime.now()
+        timezone = pytz.timezone('Asia/Bangkok')
+        thisDate = datetime.now(timezone)
         fmt = [
         "%d/%m/%y %H:%M",
         "%a %d %b %Y %I:%M%p",
