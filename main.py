@@ -18,6 +18,7 @@ from schematics.types import StringType, EmailType
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from pymongo import MongoClient
+from datetime import datetime
 
 class NewApiList(Model):
     obj_id = ObjectId()
@@ -57,10 +58,14 @@ async def main():
 
 @app.get("/ApiList")
 async def ApiList():
-    #jsonout = list(connection.db.List.find({},{_id:0}))
+    #create dict for stored data in collections
+                    #jsonout = list(connection.db.List.find({},{_id:0}))
     jsonout = {}
-    for data in connection.db.List.find():
-        jsonout = {'name_eng' : data["name_eng"]}
+    #loop in collections
+    for a in connection.db.List.find():
+        id = '{0}'.format(a['_id'])
+        dict = {'name_eng' : a.get('name_eng'),'name_th' : a.get('name_th'),'api_url' : a.get('api_url'),'params': a.get('param1')}
+        jsonout[id] = dict
     return jsonout
 
 # Signup endpoint with the POST method
@@ -68,10 +73,8 @@ async def ApiList():
 def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
     is_exists = False
     data = create(name_eng, name_th, api_url, param1)
-
     # Covert data to dict so it can be easily inserted to MongoDB
     dict(data)
-
     # Checks if an email exists from the collection of users
     if connection.db.List.find(
         {'name_eng': data['name_eng']}
@@ -82,6 +85,8 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
     # If the email doesn't exist, create the user
     elif is_exists == False:
         connection.db.List.insert_one(data)
+        data['time'] = datetime.now()
+        connection.db.Logs.insert_one(data)
         return {"message":"Success Created","name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1']}
 
 
