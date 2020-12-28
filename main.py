@@ -93,19 +93,15 @@ async def Logs():
 def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
     is_exists = False
     data = create(name_eng, name_th, api_url, param1)
-    # Covert data to dict so it can be easily inserted to MongoDB
     dict(data)
-    # Checks if an email exists from the collection of users
     if connection.db.List.find(
         {'name_eng': data['name_eng']}
         ).count() > 0:
         is_exists = True
         print("Api Already Exists")
         return {"message":"The Name Api Already Exists"}
-    # If the email doesn't exist, create the user
     elif is_exists == False:
         connection.db.List.insert_one(data)
-        #this var +0
         timezone = pytz.timezone('Asia/Bangkok')
         thisDate = datetime.now(timezone)
         fmt = [
@@ -118,8 +114,26 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
         data['time'] = datetime.now() + timedelta(hours=7)
         data['Operation'] = 'Create'
         connection.db.Logs.insert_one(data)
-        return {"message":"Success Created","Operation" : 'Create',"name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
+        return {"message":"Success Created",data['Operation'] : 'Create',"name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
 
+@app.post("/Update")
+def Update(id : str ,name_eng : str, name_th : str, api_url : str, param1 : str):
+    jsonout = {}
+    for update in connection.db.List.find({'_id': ObjectId(id)}):
+        #find_id = '{0}'.format(update['_id'])
+        if update:
+            data = create(name_eng, name_th, api_url, param1)
+            connection.db.List.update_one({'_id': ObjectId(id)},{'$set': {update['name_eng']: name_eng,update['name_th'] : name_eng},update['api_url'] : api_url,update['param1'] : param1})
+            data['time'] = datetime.now() + timedelta(hours=7)
+            data['Operation'] = 'Update'
+            data['_id'] = id
+            connection.db.Logs.insert_one(data)
+            dict = {'Operation' : data['Operation'],'name_eng' : update.get('name_eng'),'name_th' : update.get('name_th'),'api_url' : update.get('api_url'),'params': update.get('param1') , 'time': data['time']}
+            jsonout[id] = dict
+            return jsonout
+        else:
+            return {"message":"The ID Api is not Exists"}
+        
 
 if __name__ == '__main__':
    uvicorn.run(app, host="0.0.0.0", port=80, debug=True) 
