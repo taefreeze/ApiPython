@@ -21,6 +21,8 @@ from pymongo import MongoClient
 from datetime import date, datetime, time, timedelta
 import pytz
 import time
+import date_format
+import hashlib
 
 class NewApiList(Model):
     obj_id = ObjectId()
@@ -61,31 +63,22 @@ async def main():
 @app.get("/ApiList")
 async def ApiList():
     #create dict for stored data in collections
-    #jsonout = list(connection.db.List.find({},{_id:0}))
     jsonout = {}
     #loop in collections
     for a in connection.db.List.find():
         id = '{0}'.format(a['_id'])
-        dict = {'name_eng' : a.get('name_eng'),'name_th' : a.get('name_th'),'api_url' : a.get('api_url'),'params': a.get('param1')}
+        dict = {'name_eng' : a.get('name_eng'),'name_th' : a.get('name_th'),'api_url' : a.get('api_url'),'params': a.get('param1'),'time' : a.get('time')}
         jsonout[id] = dict
     return jsonout
 
 @app.get("/Logs")
 async def Logs():
     jsonout = {}
-    timezone = pytz.timezone('Asia/Bangkok')
-    fmt = [
-        "%d/%m/%y %H:%M",
-        "%a %d %b %Y %I:%M%p",
-        "%A %d %B %Y %I:%M%p",
-        "%d-%b-%y %I:%M%p"
-    ]
     for data in connection.db.Logs.find():
         id = '{0}'.format(data['_id'])
         dict = {'Operation' : data.get('Operation'),'name_eng' : data.get('name_eng'),'name_th' : data.get('name_th'),'api_url' : data.get('api_url'),'params': data.get('param1') , 'time': data.get('time')}
         #"{}".format(data.get('time').strftime(fmt[2]))
         jsonout[id] = dict
-    #ok 200
     return jsonout
 
 # Signup endpoint with the POST method
@@ -98,20 +91,13 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
         {'name_eng': data['name_eng']}
         ).count() > 0:
         is_exists = True
-        print("Api Already Exists")
+        #print("Api Already Exists")
         return {"message":"The Name Api Already Exists"}
     elif is_exists == False:
+        epoch = time.time()
+        data['time'] = epoch
+        data['id'] = hashlib.md5(b'epoch').hexdigest()
         connection.db.List.insert_one(data)
-        timezone = pytz.timezone('Asia/Bangkok')
-        thisDate = datetime.now(timezone)
-        fmt = [
-        "%d/%m/%y %H:%M",
-        "%a %d %b %Y %I:%M%p",
-        "%A %d %B %Y %I:%M%p",
-        "%d-%b-%y %I:%M%p"
-        ]
-        #modify
-        data['time'] = datetime.now() + timedelta(hours=7)
         data['Operation'] = 'Create'
         connection.db.Logs.insert_one(data)
         return {"message":"Success Created",data['Operation'] : 'Create',"name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
@@ -128,7 +114,7 @@ def Update(id : str ,name_eng : str, name_th : str, api_url : str, param1 : str)
             data['Operation'] = 'Update'
             data['_id'] = id
             connection.db.Logs.insert_one(data)
-            dict = {'Operation' : data['Operation'],'name_eng' : update.get('name_eng'),'name_th' : update.get('name_th'),'api_url' : update.get('api_url'),'params': update.get('param1') , 'time': data['time']}
+            dict = {'Operation' : data['Operation'],'name_eng' : data['name_eng'],'name_th' : data['name_th'],'api_url' : data['api_rul'],'param1': data['param1'] , 'time': data['time']}
             jsonout[id] = dict
             return jsonout
         else:
