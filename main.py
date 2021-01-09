@@ -96,12 +96,41 @@ def Signup(name_eng : str, name_th : str, api_url : str, param1 : str):
     elif is_exists == False:
         epoch = time.time()
         data['time'] = epoch
-        data['id'] = hashlib.md5(b'epoch').hexdigest()
+        #data['id'] = hashlib.md5(b'epoch').hexdigest()
+        stringEpoch = str(epoch)
+        hash = hashlib.sha1()
+        hash.update(stringEpoch.encode('utf8'))
+        data['id'] = hash.hexdigest()
         connection.db.List.insert_one(data)
         data['Operation'] = 'Create'
         connection.db.Logs.insert_one(data)
         return {"message":"Success Created",data['Operation'] : 'Create',"name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
 
+@app.post("/ApiSignup2")
+def Signup2(data : object):
+    is_exists = False
+    
+    data = create(data.name_eng, data.name_th, data.api_url, data.param1)
+    dict(data)
+    if connection.db.List.find(
+        {'name_eng': data['name_eng']}
+        ).count() > 0:
+        is_exists = True
+        #print("Api Already Exists")
+        return {"message":"The Name Api Already Exists"}
+    elif is_exists == False:
+        epoch = time.time()
+        data['time'] = epoch
+        #data['id'] = hashlib.md5(b'epoch').hexdigest()
+        stringEpoch = str(epoch)
+        hash = hashlib.sha1()
+        hash.update(stringEpoch.encode('utf8'))
+        data['id'] = hash.hexdigest()
+        connection.db.List.insert_one(data)
+        data['Operation'] = 'Create'
+        connection.db.Logs.insert_one(data)
+        return {"message":"Success Created",data['Operation'] : 'Create',"name_eng": data['name_eng'], "name_th": data['name_th'], "api_url": data['api_url'], "param1": data['param1'],"datetime": data['time']}
+    
 @app.post("/Update")
 def Update(id : str ,name_eng : str, name_th : str, api_url : str, param1 : str):
     jsonout = {}
